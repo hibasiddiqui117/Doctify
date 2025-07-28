@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnosis Results | Doctify</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='images/doctify_logo.png') }}" alt="Doctify Logo" class="logo">
+                <span>Doctify</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Services</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="results-section">
+            <div class="container">
+                <div class="back-button">
+                    <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Back to Home</a>
+                </div>
+
+                <div class="results-header">
+                    <h1>Your Diagnosis Results</h1>
+                    <div class="confidence-badge">
+                        <span id="confidence-value">85%</span> Confidence
+                    </div>
+                </div>
+
+                <div class="symptoms-summary">
+                    <h3>Based on your symptoms:</h3>
+                    <div class="symptoms-list" id="symptoms-list">
+                        <!-- Symptoms will be populated here -->
+                    </div>
+                </div>
+
+                <div class="diagnosis-card">
+                    <h2><i class="fas fa-diagnosis"></i> Likely Condition</h2>
+                    <div class="condition" id="condition-name">
+                        <!-- Condition will be populated here -->
+                    </div>
+                </div>
+
+                <div class="results-grid">
+                    <div class="remedies-card">
+                        <h3><i class="fas fa-home"></i> Home Remedies</h3>
+                        <ul id="remedies-list">
+                            <!-- Remedies will be populated here -->
+                        </ul>
+                    </div>
+
+                    <div class="medications-card">
+                        <h3><i class="fas fa-pills"></i> Medications</h3>
+                        <ul id="medications-list">
+                            <!-- Medications will be populated here -->
+                        </ul>
+                    </div>
+
+                    <div class="precautions-card">
+                        <h3><i class="fas fa-shield-virus"></i> Precautions</h3>
+                        <ul id="precautions-list">
+                            <!-- Precautions will be populated here -->
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="specialists-section">
+                    <h2><i class="fas fa-user-md"></i> Recommended Specialists</h2>
+                    <div class="specialists-grid" id="specialists-grid">
+                        <!-- Specialists will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="{{ url_for('static', filename='images/doctify_logo.png') }}" alt="Doctify Logo">
+                    <span>Doctify</span>
+                </div>
+                <div class="footer-links">
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 Doctify. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

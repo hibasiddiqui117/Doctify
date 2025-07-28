@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctify - AI-Powered Medical Diagnosis & Doctor Booking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='images/doctify_logo.png') }}" alt="Doctify" class="logo">
+            </div>
+            
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#" class="active"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="#"><i class="fas fa-user-md"></i> Doctors</a></li>
+                    <li><a href="#"><i class="fas fa-hospital"></i> Hospitals</a></li>
+                    <li><a href="#"><i class="fas fa-flask"></i> Labs</a></li>
+                    <li><a href="#"><i class="fas fa-blog"></i> Health Blog</a></li>
+                </ul>
+            </nav>
+            
+            <div class="auth-buttons">
+                <a href="#" class="btn btn-outline"><i class="fas fa-sign-in-alt"></i> Login</a>
+                <a href="#" class="btn btn-primary"><i class="fas fa-user-plus"></i> Sign Up</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Find the Right Doctor & Get AI-Powered Diagnosis</h1>
+                <p>Book appointments with top specialists or describe your symptoms for instant analysis</p>
+                
+                <div class="search-box">
+                    <div class="search-tabs">
+                        <button class="tab-btn active" id="searchConditionTab">By Condition</button>
+                        <button class="tab-btn" id="searchSymptomTab">By Symptoms</button>
+                        <button class="tab-btn" id="searchSpecialtyTab">By Specialty</button>
+                    </div>
+                    
+                    <div class="tab-content active" id="searchConditionContent">
+                        <input type="text" placeholder="e.g. Diabetes, Fever, Pregnancy...">
+                        <button class="search-btn"><i class="fas fa-search"></i> Search</button>
+                    </div>
+                    
+                    <div class="tab-content" id="searchSymptomContent">
+                        <input type="text" placeholder="Describe your symptoms...">
+                        <button class="search-btn"><i class="fas fa-diagnoses"></i> Analyze</button>
+                    </div>
+                    
+                    <div class="tab-content" id="searchSpecialtyContent">
+                        <select>
+                            <option value="">Select Specialty</option>
+                            {% for specialty in specialties %}
+                            <option value="{{ specialty.name }}">{{ specialty.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button class="search-btn"><i class="fas fa-user-md"></i> Find Doctors</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hero-image">
+                <img src="{{ url_for('static', filename='images/hero_doctor.png') }}" alt="Doctor Consultation">
+            </div>
+        </div>
+    </section>
+
+    <!-- Common Conditions -->
+    <section class="section conditions-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Common Health Conditions</h2>
+                <a href="#" class="view-all">View All <i class="fas fa-chevron-right"></i></a>
+            </div>
+            
+            <div class="conditions-grid">
+                {% for condition in conditions %}
+                <div class="condition-card" onclick="searchSpecialists('{{ condition.name }}')">
+                    <div class="condition-icon">
+                        <i class="{{ condition.icon }}"></i>
+                    </div>
+                    <h3>{{ condition.name }}</h3>
+                    <p>{{ condition.specialty }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Symptom Checker -->
+    <section class="section symptom-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Symptom Checker</h2>
+                <p>Describe your symptoms for AI-powered preliminary diagnosis</p>
+            </div>
+            
+            <div class="symptom-checker">
+                <div class="symptom-input">
+                    <h3><i class="fas fa-notes-medical"></i> Describe Your Symptoms</h3>
+                    <textarea id="symptomsInput" placeholder="e.g. fever for 3 days, headache, nausea..."></textarea>
+                    <button class="btn btn-primary" onclick="analyzeSymptoms()">
+                        <i class="fas fa-diagnoses"></i> Analyze Symptoms
+                    </button>
+                </div>
+                
+                <div class="common-symptoms">
+                    <h3>Common Symptoms</h3>
+                    <div class="symptoms-grid">
+                        {% for symptom in symptoms %}
+                        <div class="symptom-tag" onclick="addSymptom('{{ symptom.name }}')">
+                            <i class="{{ symptom.icon }}"></i>
+                            {{ symptom.name }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <div id="diagnosisResult" class="diagnosis-result"></div>
+        </div>
+    </section>
+
+    <!-- Top Specialists -->
+    <section class="section specialists-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Our Top Specialists</h2>
+                <a href="#" class="view-all">View All <i class="fas fa-chevron-right"></i></a>
+            </div>
+            
+            <div class="specialists-grid" id="specialistsContainer">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="section steps-section">
+        <div class="container">
+            <h2>How Doctify Works</h2>
+            
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <i class="fas fa-search"></i>
+                    <h3>Search</h3>
+                    <p>Find doctors by condition, specialty or symptoms</p>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <i class="fas fa-calendar-check"></i>
+                    <h3>Book</h3>
+                    <p>Choose your preferred doctor and time slot</p>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <i class="fas fa-comment-medical"></i>
+                    <h3>Consult</h3>
+                    <p>Get diagnosis and treatment plan</p>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <i class="fas fa-pills"></i>
+                    <h3>Recover</h3>
+                    <p>Follow up and get better</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <img src="{{ url_for('static', filename='images/doctify_logo.png') }}" alt="Doctify" class="footer-logo">
+                    <p>AI-powered healthcare platform connecting patients with the best medical professionals.</p>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">Doctors</a></li>
+                        <li><a href="#">Hospitals</a></li>
+                        <li><a href="#">Labs</a></li>
+                        <li><a href="#">Health Blog</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Company</h3>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Press</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 Doctify. All rights reserved.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Global state
+        const state = {
+            selectedSymptoms: []
+        };
+
+        // DOM Elements
+        const symptomsInput = document.getElementById('symptomsInput');
+        const diagnosisResult = document.getElementById('diagnosisResult');
+        const specialistsContainer = document.getElementById('specialistsContainer');
+        
+        // Tab switching
+        const tabs = {
+            condition: {
+                tab: document.getElementById('searchConditionTab'),
+                content: document.getElementById('searchConditionContent')
+            },
+            symptom: {
+                tab: document.getElementById('searchSymptomTab'),
+                content: document.getElementById('searchSymptomContent')
+            },
+            specialty: {
+                tab: document.getElementById('searchSpecialtyTab'),
+                content: document.getElementById('searchSpecialtyContent')
+            }
+        };
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up tab switching
+            for (const [key, {tab, content}] of Object.entries(tabs)) {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all
+                    Object.values(tabs).forEach(t => {
+                        t.tab.classList.remove('active');
+                        t.content.classList.remove('active');
+                    });
+                    
+                    // Add to clicked tab
+                    tab.classList.add('active');
+                    content.classList.add('active');
+                });
+            }
+            
+            // Load top specialists
+            loadTopSpecialists();
+        });
+
+        // Add symptom to input
+        function addSymptom(symptom) {
+            const currentText = symptomsInput.value.trim();
+            symptomsInput.value = currentText ? `${currentText}, ${symptom}` : symptom;
+        }
+
+        // Analyze symptoms
+        async function analyzeSymptoms() {
+            const symptomsText = symptomsInput.value.trim();
+            if (!symptomsText) {
+                showError("Please describe your symptoms");
+                return;
+            }
+
+            // Extract individual symptoms
+            const symptoms = symptomsText.split(',')
+                .map(s => s.trim())
+                .filter(s => s.length > 0);
+
+            if (symptoms.length === 0) {
+                showError("Please enter valid symptoms separated by commas");
+                return;
+            }
+
+            try {
+                showLoading();
+                
+                const response = await axios.post('/api/diagnose', {
+                    symptoms: symptoms
+                });
+
+                if (response.data.success) {
+                    displayDiagnosis(response.data.diagnosis);
+                    
+                    // Show specialists for the condition if available
+                    if (response.data.diagnosis.condition) {
+                        searchSpecialists(response.data.diagnosis.condition);
+                    }
+                } else {
+                    showError(response.data.error || "Diagnosis failed");
+                }
+            } catch (error) {
+                console.error("Diagnosis error:", error);
+                showError("Failed to analyze symptoms. Please try again.");
+            }
+        }
+
+        // Display diagnosis results
+        function displayDiagnosis(result) {
+            let html = `
+                <div class="diagnosis-card">
+                    <div class="diagnosis-header">
+                        <h3><i class="fas fa-diagnoses"></i> Preliminary Diagnosis</h3>
+                        <span class="confidence-badge">${result.confidence || 'High'} Confidence</span>
+                    </div>
+                    
+                    <div class="diagnosis-main">
+                        <h2>${result.condition || 'Possible Condition'}</h2>
+                        <p class="diagnosis-overview">${result.context?.overview || ''}</p>
+                    </div>
+            `;
+
+            // Add context sections if available
+            if (result.context) {
+                // Remedies
+                if (result.context.remedies?.length > 0) {
+                    html += `
+                        <div class="context-section">
+                            <h4><i class="fas fa-home"></i> Suggested Remedies</h4>
+                            <ul class="context-list">
+                                ${result.context.remedies.map(r => `<li>${r}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                // Precautions
+                if (result.context.precautions?.length > 0) {
+                    html += `
+                        <div class="context-section">
+                            <h4><i class="fas fa-shield-alt"></i> Precautions</h4>
+                            <ul class="context-list">
+                                ${result.context.precautions.map(p => `<li>${p}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                // Medications
+                if (result.context.medications?.length > 0) {
+                    html += `
+                        <div class="context-section">
+                            <h4><i class="fas fa-pills"></i> Possible Medications</h4>
+                            <div class="warning-note">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Warning:</strong> Always consult a doctor before taking any medication
+                            </div>
+                            <ul class="context-list">
+                                ${result.context.medications.map(m => `<li>${m}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                // Similar cases
+                if (result.context.similar_cases?.length > 0) {
+                    html += `
+                        <div class="context-section">
+                            <h4><i class="fas fa-clipboard-list"></i> Similar Cases</h4>
+                            <div class="similar-cases">
+                                ${result.context.similar_cases.map(c => `
+                                    <div class="case-card">
+                                        <p><strong>Symptoms:</strong> ${c.symptoms || 'Not specified'}</p>
+                                        <p><strong>Diagnosis:</strong> ${c.diagnosis || 'Not specified'}</p>
+                                        <p><strong>Treatment:</strong> ${c.treatment || 'Not specified'}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            html += `
+                    <div class="diagnosis-actions">
+                        <button class="btn btn-primary" onclick="searchSpecialists('${result.condition || ''}')">
+                            <i class="fas fa-user-md"></i> Find Specialists
+                        </button>
+                        <button class="btn btn-outline">
+                            <i class="fas fa-save"></i> Save Report
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            diagnosisResult.innerHTML = html;
+        }
+
+        // Load top specialists
+        async function loadTopSpecialists() {
+            try {
+                const response = await axios.get('/api/specialists?condition=general');
+                if (response.data.success) {
+                    displaySpecialists(response.data.specialists);
+                }
+            } catch (error) {
+                console.error("Error loading specialists:", error);
+            }
+        }
+
+        // Search specialists by condition
+        async function searchSpecialists(condition) {
+            try {
+                const response = await axios.get(`/api/specialists?condition=${encodeURIComponent(condition)}`);
+                if (response.data.success) {
+                    displaySpecialists(response.data.specialists);
+                    
+                    // Scroll to specialists section
+                    document.querySelector('.specialists-section').scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            } catch (error) {
+                console.error("Error searching specialists:", error);
+            }
+        }
+
+        // Display specialists
+        function displaySpecialists(specialists) {
+            specialistsContainer.innerHTML = specialists.map(spec => `
+                <div class="specialist-card">
+                    <div class="specialist-image">
+                        <img src="${spec.image || '/static/images/doctor_1.jpg'}" alt="${spec.name}">
+                        <div class="rating-badge">
+                            <i class="fas fa-star"></i> ${spec.rating}
+                        </div>
+                    </div>
+                    
+                    <div class="specialist-info">
+                        <h3>${spec.name}</h3>
+                        <p class="specialty">${spec.specialty}</p>
+                        <p class="experience"><i class="fas fa-briefcase"></i> ${spec.experience} experience</p>
+                        <p class="location"><i class="fas fa-map-marker-alt"></i> ${spec.location}</p>
+                        <p class="fee"><i class="fas fa-money-bill-wave"></i> Rs. ${spec.fee}</p>
+                        <p class="availability ${spec.available === 'Today' ? 'available-today' : ''}">
+                            <i class="fas fa-calendar-day"></i> ${spec.available}
+                        </p>
+                        
+                        <div class="specialist-actions">
+                            <button class="btn btn-sm btn-primary" onclick="bookAppointment('${spec.id}')">
+                                <i class="fas fa-calendar-check"></i> Book Now
+                            </button>
+                            <button class="btn btn-sm btn-outline">
+                                <i class="fas fa-info-circle"></i> Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Book appointment
+        function bookAppointment(doctorId) {
+            alert(`Booking appointment with doctor ID: ${doctorId}\nThis would open a booking modal in production.`);
+        }
+
+        // Show loading state
+        function showLoading() {
+            diagnosisResult.innerHTML = `
+                <div class="loading-state">
+                    <div class="spinner"><i class="fas fa-spinner fa-spin"></i></div>
+                    <p>Analyzing your symptoms with our AI diagnostic system...</p>
+                </div>
+            `;
+        }
+
+        // Show error message
+        function showError(message) {
+            diagnosisResult.innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>${message}</p>
+                    <button class="btn btn-sm btn-outline" onclick="analyzeSymptoms()">
+                        <i class="fas fa-redo"></i> Try Again
+                    </button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

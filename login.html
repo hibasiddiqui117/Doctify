@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-form animated fadeIn">
+        <div class="auth-header">
+            <h2>Welcome Back</h2>
+            <p>Please login to continue</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('login') }}" class="auth-form-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} animated shake">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <div class="form-group">
+                <input type="email" name="email" placeholder="Email" required>
+                <i class="fas fa-envelope"></i>
+            </div>
+            
+            <div class="form-group">
+                <input type="password" name="password" placeholder="Password" required>
+                <i class="fas fa-lock"></i>
+            </div>
+            
+            <button type="submit" class="btn-auth">Login <i class="fas fa-arrow-right"></i></button>
+            
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a></p>
+                <a href="#" class="forgot-password">Forgot password?</a>
+            </div>
+        </form>
+    </div>
+    
+    <div class="auth-illustration">
+        <img src="{{ url_for('static', filename='images/auth.svg') }}" alt="Login Illustration" class="animated fadeInRight">
+    </div>
+</div>
+{% endblock %}

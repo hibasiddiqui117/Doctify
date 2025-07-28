@@ -1,0 +1,7 @@
+backend/db.py
+/config
+*.env
+/config
+backend/config.py
+backend/DataBase/config/db_connector.py
+/config
